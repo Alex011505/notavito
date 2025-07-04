@@ -1,16 +1,16 @@
-package com.lithanarianaren.notavito.model;
+package com.lithanarianaren.notavito.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
 @Entity
-@Table(name = "books")
-public class Advertisement {
+@Table(name = "entities")
+public class AdvertisementEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ad_id")
     private Integer id;
+
+
 }
