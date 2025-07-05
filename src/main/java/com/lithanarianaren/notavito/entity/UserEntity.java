@@ -25,9 +25,9 @@ public class UserEntity {
     @Column(unique = true)
     private String phone;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<AdvertisementEntity> advertisements;
+    //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    //@JsonManagedReference
+    //private List<AdvertisementEntity> advertisements;
 
 
 }
