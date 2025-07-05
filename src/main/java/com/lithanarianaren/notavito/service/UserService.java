@@ -24,6 +24,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
+
+
     public UserEntity register(RegisterRequest request){
 
         ensureUnique(request);

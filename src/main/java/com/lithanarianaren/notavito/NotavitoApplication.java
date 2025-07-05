@@ -9,21 +9,10 @@ import lombok.extern.java.Log;
 import javax.sql.DataSource;
 
 @SpringBootApplication
-@Log
-public class NotavitoApplication implements CommandLineRunner {
-
-	private final DataSource dataSource;
-
-	public NotavitoApplication (final DataSource dataSource) {this.dataSource = dataSource;}
+public class NotavitoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(NotavitoApplication.class, args);
-	}
-
-	public void run(final String... args) {
-		log.info("Datasource: " + dataSource.toString());
-		final JdbcTemplate restTemplate = new JdbcTemplate(dataSource);
-		restTemplate.execute("select 1");
 	}
 
 }
