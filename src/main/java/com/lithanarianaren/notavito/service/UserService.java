@@ -1,11 +1,17 @@
 package com.lithanarianaren.notavito.service;
 
+import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.LoginRequest;
 import com.lithanarianaren.notavito.dto.request.RegisterRequest;
+import com.lithanarianaren.notavito.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.lithanarianaren.notavito.entity.UserEntity;
@@ -19,35 +25,22 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
 
 
 
-    public UserEntity register(RegisterRequest request){
+    public UserDto register(RegisterRequest request){
 
         ensureUnique(request);
 
-        UserEntity user = new UserEntity();
-
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
-        user.setPatronymic(request.getPatronymic());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setPhone(request.getPhone());
-
+        UserEntity user = userMapper.fromCreateRequest(request);
         userRepository.save(user);
 
-        Optional<UserEntity> newUser = userRepository.findByEmail(request.getEmail());
-        if(newUser.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-        return newUser.get();
+        return userMapper.toDto(user);
 
     }
 
@@ -66,6 +59,7 @@ public class UserService {
 
         }
 
+        if(!err.isEmpty())
             throw new ResponseStatusException(
 
                     HttpStatus.BAD_REQUEST,
@@ -75,21 +69,26 @@ public class UserService {
 
         }
 
-
-
-    public Optional<UserEntity> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public UserDto findByEmail(String email) {
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No such user"
+            );
+        }
+        return userMapper.toDto(optionalUser.get());
     }
 
-    public List<UserEntity> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> findAllUsers() {
+        return userMapper.toDtoList(userRepository.findAll());
     }
 
-    public Optional<UserEntity> getCurrentUser() {
+    public Optional<UserDto> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String login = authentication.getName();
-            return findByEmail(login);
+            return Optional.ofNullable(findByEmail(login));
         }
         return Optional.empty();
     }
@@ -134,5 +133,18 @@ public class UserService {
         }
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            var userObj = user.get();
+            return User.builder()
+                    .username(userObj.getEmail())
+                    .password(userObj.getPassword())
+                    .build();
+        }else{
+            throw new UsernameNotFoundException(email);
+        }
+    }
 }
 

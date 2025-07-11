@@ -9,20 +9,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 @Entity
 @Table(name = "advertisements")
 @Getter
 @Setter
-public class AdvertisementEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class AdvertisementEntity extends BaseEntity {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-
     private CategoryEntity category;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -36,8 +30,6 @@ public class AdvertisementEntity {
 
     private BigDecimal price;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id")
-    private ImageEntity image;
+    private String imageUrl;
 }
 

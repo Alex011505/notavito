@@ -1,5 +1,6 @@
 package com.lithanarianaren.notavito.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,20 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class CategoryEntity {
+@Getter
+@Setter
+@Table(name = "categories")
+public class CategoryEntity extends BaseEntity {
 
-    @Setter
-    @Getter
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Setter
-    @Getter
     private String name;
 
-    @Setter
-    @Getter
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private CategoryEntity parent;
@@ -30,7 +24,8 @@ public class CategoryEntity {
     @OneToMany(mappedBy = "parent")
     private List<CategoryEntity> children = new ArrayList<>();
 
-    public CategoryEntity() {
-    }
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<AdvertisementEntity> advertisements;
 
 }

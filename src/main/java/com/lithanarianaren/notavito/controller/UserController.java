@@ -1,5 +1,6 @@
 package com.lithanarianaren.notavito.controller;
 
+import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.LoginRequest;
 import com.lithanarianaren.notavito.dto.request.RegisterRequest;
 import com.lithanarianaren.notavito.entity.UserEntity;
@@ -19,9 +20,9 @@ public class UserController {
     private final UserService service;
 
     @PostMapping
-    public ResponseEntity<UserEntity> register(@Valid @RequestBody RegisterRequest request){
+    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterRequest request){
 
-        UserEntity user = service.register(request);
+        UserDto user = service.register(request);
         return ResponseEntity.ok(user);
 
     }

@@ -2,104 +2,122 @@ package com.lithanarianaren.notavito.service;
 
 import com.lithanarianaren.notavito.dto.AdvertisementDto;
 import com.lithanarianaren.notavito.dto.CategoryDto;
+import com.lithanarianaren.notavito.dto.UserDto;
+import com.lithanarianaren.notavito.dto.request.AdvertisementRequest;
 import com.lithanarianaren.notavito.entity.AdvertisementEntity;
 import com.lithanarianaren.notavito.entity.CategoryEntity;
 import com.lithanarianaren.notavito.entity.ImageEntity;
+import com.lithanarianaren.notavito.mapper.AdvertisementMapper;
 import com.lithanarianaren.notavito.repository.AdvertisementRepository;
+import com.lithanarianaren.notavito.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdvertisementService {
 
-    private final AdvertisementRepository adRepo;
+    private final AdvertisementRepository advertisementRepository;
     private final CategoryService categoryService;
     private final UserService userService;
-    private final ImageService imageService;
+    private final AdvertisementMapper advertisementMapper;
+    private final UserRepository userRepository;
 
-    public AdvertisementService(AdvertisementRepository adRepo,
-                                CategoryService categoryService,
-                                UserService userService,
-                                ImageService imageService) {
-        this.adRepo = adRepo;
-        this.categoryService = categoryService;
-        this.userService = userService;
-        this.imageService = imageService;
+    public AdvertisementDto create(AdvertisementRequest request) {
+        // Автор - текущий пользователь
+        Optional<UserDto> author = userService.getCurrentUser();
+        if(author.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
+                    "Not authenticated"
+            );
+        }
+
+        AdvertisementEntity advertisement = advertisementMapper.fromCreateRequest(request);
+        // Как обмениваться сущностями между сервисами?
+        advertisement.setAuthor(userRepository.findById(author.get().getId()).get());
+
+        advertisementRepository.save(advertisement);
+
+        return advertisementMapper.toDto(advertisement);
     }
 
-    public AdvertisementDto save(AdvertisementDto dto) {
-        AdvertisementEntity ad = dto.getId() != null
-                ? adRepo.findById(dto.getId()).orElseThrow(() ->
-                new IllegalArgumentException("AdvertisementEntity not found: " + dto.getId()))
-                : new AdvertisementEntity();
+    public AdvertisementDto edit(Long id, AdvertisementRequest request) {
+        // проверка на авторизацию
+        Optional<UserDto> author = userService.getCurrentUser();
+        if(author.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
+                    "Not authenticated"
+            );
+        }
+        
+        // проверка на существование
+        Optional<AdvertisementEntity> advertisementOptional = advertisementRepository.findById(id);
+        if(advertisementOptional.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No such advertisement"
+            );
+        }
+
+        AdvertisementEntity advertisement = advertisementOptional.get();
+        
+        // проверка на авторство
+        if(!Objects.equals(author.get().getId(), advertisement.getAuthor().getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Not the author"
+            );
+        }
 
         // общие поля
-        ad.setTitle(dto.getTitle());
-        ad.setDescription(dto.getDescription());
-        ad.setPrice(dto.getPrice());
+        advertisement.setTitle(request.getTitle());
+        advertisement.setDescription(request.getDescription());
+        advertisement.setPrice(request.getPrice());
+        advertisement.setImageUrl(request.getImageUrl());
 
-
-        Optional<CategoryEntity> categoryEntity = categoryService.getCategoryEntity(dto.getCategoryId());
+        // категория - приведение в сущность
+        Optional<CategoryEntity> categoryEntity = categoryService.getCategoryEntity(request.getCategory());
         if(categoryEntity.isPresent()){
-            ad.setCategory(categoryEntity.get());
-        } else { throw new IllegalArgumentException("Category not found"); }
+            advertisement.setCategory(categoryEntity.get());
+        } else {throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No such category"
+        );}
 
-        // автор
-        userService.findUser(dto.getAuthorId(), null, null)
-                .ifPresentOrElse(ad::setAuthor,
-                        () -> { throw new IllegalArgumentException("Author not found"); });
-
-        // изображение по stringId
-        ImageEntity img = imageService.getByStringId(dto.getImageStringId());
-        ad.setImage(img);
-
-        AdvertisementEntity saved = adRepo.save(ad);
-        return toDto(saved);
+        AdvertisementEntity saved = advertisementRepository.save(advertisement);
+        return advertisementMapper.toDto(saved);
     }
 
-    public Optional<AdvertisementDto> findById(Long id) {
-        return adRepo.findById(id).map(this::toDto);
+    public AdvertisementDto getAdvertisement(Long id) {
+        Optional<AdvertisementEntity> advertisementOptional = advertisementRepository.findById(id);
+        if(advertisementOptional.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No such advertisement"
+            );
+        }
+        return advertisementMapper.toDto(advertisementOptional.get());
     }
 
     public void deleteById(Long id) {
-        adRepo.deleteById(id);
+        advertisementRepository.deleteById(id);
     }
 
-    public List<AdvertisementDto> findByName(String name) {
-        return adRepo.findByTitleContainingIgnoreCase(name).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+    public List<AdvertisementDto> findByTitleContainingIgnoreCase(String name) {
+        return advertisementMapper.toDtoList(advertisementRepository.findByTitleContainingIgnoreCase(name));
     }
 
-    private AdvertisementDto toDto(AdvertisementEntity ad) {
-        AdvertisementDto dto = new AdvertisementDto();
-        dto.setId(ad.getId());
-        dto.setTitle(ad.getTitle());
-        dto.setDescription(ad.getDescription());
-        dto.setPrice(ad.getPrice());
-        dto.setCategoryId(ad.getCategory().getId());
-        dto.setAuthorId(ad.getAuthor().getId());
-
-        // отдаём URL
-        ImageEntity img = ad.getImage();
-        String ext = extensionFromMime(img.getMimeType());
-        dto.setImageUrl("/images/" + img.getStringId() + ext);
-
-        return dto;
-    }
-
-    // вспомогательный метод для расширения
-    private String extensionFromMime(String mime) {
-        return switch (mime) {
-            case "image/jpeg" -> ".jpg";
-            case "image/png"  -> ".png";
-            case "image/gif"  -> ".gif";
-            case "image/webp" -> ".webp";
-            default            -> "";
-        };
+    public List<AdvertisementDto> findAll() {
+        return advertisementMapper.toDtoList(advertisementRepository.findAll());
     }
 }
 

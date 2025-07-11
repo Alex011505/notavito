@@ -3,16 +3,16 @@ package com.lithanarianaren.notavito.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Table(name = "users")
 @Entity
-public class UserEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+public class UserEntity extends BaseEntity {
 
     private String name;
     private String surname;
@@ -25,9 +25,9 @@ public class UserEntity {
     @Column(unique = true)
     private String phone;
 
-    //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    //@JsonManagedReference
-    //private List<AdvertisementEntity> advertisements;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<AdvertisementEntity> advertisements;
 
 
 }

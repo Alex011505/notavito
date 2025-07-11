@@ -9,13 +9,11 @@ import java.math.BigDecimal;
 @Getter
 public class AdvertisementDto {
     private Long id;
-    private Long categoryId;
-    private Long authorId;
-
+    private Long category;
+    private Long author;
     private String title;
     private String description;
     private BigDecimal price;
-    private String imageStringId;
     private String imageUrl;
 
 }
