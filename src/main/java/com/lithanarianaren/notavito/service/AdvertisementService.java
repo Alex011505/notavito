@@ -1,12 +1,10 @@
 package com.lithanarianaren.notavito.service;
 
 import com.lithanarianaren.notavito.dto.AdvertisementDto;
-import com.lithanarianaren.notavito.dto.CategoryDto;
 import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.AdvertisementRequest;
 import com.lithanarianaren.notavito.entity.AdvertisementEntity;
 import com.lithanarianaren.notavito.entity.CategoryEntity;
-import com.lithanarianaren.notavito.entity.ImageEntity;
 import com.lithanarianaren.notavito.mapper.AdvertisementMapper;
 import com.lithanarianaren.notavito.repository.AdvertisementRepository;
 import com.lithanarianaren.notavito.repository.UserRepository;
@@ -18,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

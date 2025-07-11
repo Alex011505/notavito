@@ -1,6 +1,5 @@
 package com.lithanarianaren.notavito.controller;
 
-import com.lithanarianaren.notavito.dto.AdvertisementDto;
 import com.lithanarianaren.notavito.dto.CategoryDto;
 import com.lithanarianaren.notavito.dto.request.CategoryRequest;
 import com.lithanarianaren.notavito.service.CategoryService;

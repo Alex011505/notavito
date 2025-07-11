@@ -1,6 +1,6 @@
 package com.lithanarianaren.notavito.service;
 
-import com.lithanarianaren.notavito.dto.AdvertisementDto;
+
 import com.lithanarianaren.notavito.dto.CategoryDto;
 import com.lithanarianaren.notavito.dto.request.CategoryRequest;
 import com.lithanarianaren.notavito.entity.CategoryEntity;
@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
