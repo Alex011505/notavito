@@ -18,9 +18,7 @@ public class ImageController {
 
     private final ImageService imageService;
 
-    /**
-     * карта расширение → MIME-тип
-     */
+
     private static final Map<String, String> EXT2MIME = Map.of(
             "png",  "image/png",
             "jpg",  "image/jpeg",
@@ -33,9 +31,6 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    /**
-     * Выдача изображения по пути /images/{stringId}.{extension}
-     */
     @GetMapping(value = "/{stringId}.{extension}")
     public ResponseEntity<byte[]> getImage(
             @PathVariable String stringId,
