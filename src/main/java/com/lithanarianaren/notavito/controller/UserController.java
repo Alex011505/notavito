@@ -3,6 +3,7 @@ package com.lithanarianaren.notavito.controller;
 import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.LoginRequest;
 import com.lithanarianaren.notavito.dto.request.RegisterRequest;
+import com.lithanarianaren.notavito.dto.response.LoginResponse;
 import com.lithanarianaren.notavito.entity.UserEntity;
 import com.lithanarianaren.notavito.service.UserService;
 import jakarta.validation.Valid;
@@ -14,35 +15,42 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/user")
+@RequestMapping("users")
 public class UserController {
 
     private final UserService service;
 
-    @PostMapping
-    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterRequest request){
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request){
 
-        UserDto user = service.register(request);
-        return ResponseEntity.ok(user);
+        LoginResponse response = service.register(request);
+        return ResponseEntity.ok(response);
 
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserEntity> login(@RequestBody LoginRequest request){
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
 
-        UserEntity user = service.login(request);
-        return ResponseEntity.ok(user);
+        LoginResponse response = service.login(request);
+        return ResponseEntity.ok(response);
 
     }
 
-    @GetMapping
-    public ResponseEntity<UserEntity> getUser(
+    @GetMapping("/search")
+    public ResponseEntity<UserDto> getUser(
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone
     ) {
-        Optional<UserEntity> user = service.findUser(id, email, phone);
+        Optional<UserDto> user = service.findUser(id, email, phone);
 
+        return user.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<UserDto> getCurrentUser() {
+        Optional<UserDto> user = service.getCurrentUser();
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

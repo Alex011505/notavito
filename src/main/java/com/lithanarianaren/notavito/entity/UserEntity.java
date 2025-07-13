@@ -13,9 +13,14 @@ import java.util.List;
 @Setter
 public class UserEntity extends BaseEntity {
 
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String surname;
+    @Column
     private String patronymic;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(unique = true)
@@ -23,6 +28,9 @@ public class UserEntity extends BaseEntity {
 
     @Column(unique = true)
     private String phone;
+
+    @Column(nullable = false)
+    private String role = "USER";
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     @JsonManagedReference

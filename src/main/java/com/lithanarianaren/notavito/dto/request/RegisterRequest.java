@@ -10,8 +10,6 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank(message = "Cannot be blank")
-
-    @NotBlank(message = "Cannot be blank")
     @Pattern(regexp = "^[А-ЯЁа-яё]+$", message = "Can only use cyrillic letters")
 
     private String name;

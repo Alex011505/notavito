@@ -3,7 +3,9 @@ package com.lithanarianaren.notavito.service;
 import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.LoginRequest;
 import com.lithanarianaren.notavito.dto.request.RegisterRequest;
+import com.lithanarianaren.notavito.dto.response.LoginResponse;
 import com.lithanarianaren.notavito.mapper.UserMapper;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -12,48 +14,50 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.lithanarianaren.notavito.entity.UserEntity;
 import com.lithanarianaren.notavito.repository.UserRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final JSONWebTokenService jsonWebTokenService;
+    private final PasswordEncoder passwordEncoder;
 
 
 
 
-    public UserDto register(RegisterRequest request){
+    public LoginResponse register(RegisterRequest request){
 
         ensureUnique(request);
 
         UserEntity user = userMapper.fromCreateRequest(request);
         userRepository.save(user);
 
-        return userMapper.toDto(user);
+        String token = jsonWebTokenService.newToken(user.getEmail(), user.getRole());
+
+        return new LoginResponse(token, user.getEmail(), user.getRole());
 
     }
 
     private void ensureUnique(RegisterRequest request){
 
-        Map<String, String> err = new HashMap<>();
+        List<String> err = new ArrayList<>();
 
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            err.put("email", "Email in use");
+            err.add("Email in use");
         }
 
         if (userRepository.findByPhone(request.getPhone()).isPresent()){
 
-            err.put("numPhone", "Phone in use");
+            err.add("Phone in use");
 
         }
 
@@ -61,7 +65,7 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(
 
                     HttpStatus.BAD_REQUEST,
-                    String.join(", ", err.values())
+                    String.join(", ", err)
 
             );
 
@@ -86,6 +90,7 @@ public class UserService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String login = authentication.getName();
+            System.out.println(login);
             return Optional.ofNullable(findByEmail(login));
         }
         return Optional.empty();
@@ -97,35 +102,29 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public UserEntity login(LoginRequest request){
+    public LoginResponse login(LoginRequest request){
 
-        Optional<UserEntity> user = userRepository.findByEmail(request.getEmail());
-        Map<String, String> err = new HashMap<>();
-        if (user.isPresent()){
-            UserEntity sureUser = user.get();
-            if (sureUser.getPassword().equals(request.getPassword())){
-                return sureUser;
-            } else {
-                err.put("password", "Incorrect password");
-            }
-        } else {
-            err.put("email", "No such email");
+        UserEntity user = userRepository.findByEmail(request.getEmail()).orElseThrow(()->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such email"));
+
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect password");
         }
-        throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                String.join(", ", err.values())
-        );
+
+        String token = jsonWebTokenService.newToken(user.getEmail(), user.getRole());
+
+        return new LoginResponse(token, user.getEmail(), user.getRole());
 
     }
 
 
-    public Optional<UserEntity> findUser(Long id, String email, String phone) {
+    public Optional<UserDto> findUser(Long id, String email, String phone) {
         if (id != null) {
-            return userRepository.findById(id);
+            return userRepository.findById(id).map(userMapper::toDto);
         } else if (email != null) {
-            return userRepository.findByEmail(email);
+            return userRepository.findByEmail(email).map(userMapper::toDto);
         } else if (phone != null) {
-            return userRepository.findByPhone(phone);
+            return userRepository.findByPhone(phone).map(userMapper::toDto);
         } else {
             return Optional.empty();
         }
