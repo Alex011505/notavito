@@ -4,12 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "images")
 public class ImageEntity extends BaseEntity {
 
@@ -20,6 +22,6 @@ public class ImageEntity extends BaseEntity {
     private String mimeType;
 
     @Lob
-    @Column(name = "data", nullable = false, columnDefinition = "BYTEA")
+    @Column(name = "data", nullable = false)
     private byte[] data;
 }
