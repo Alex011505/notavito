@@ -54,7 +54,7 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<ImageDto> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            ImageEntity saved = imageService.save(file);
+            ImageEntity saved = imageService.create(file);
             ImageDto dto = new ImageDto();
             dto.setId(saved.getId());
             dto.setUrl("/images/" + saved.getStringId() + getExtensionFromMime(saved.getMimeType()));

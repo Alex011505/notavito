@@ -29,17 +29,14 @@ public class AdvertisementService {
 
     public AdvertisementDto create(AdvertisementRequest request) {
         // Автор - текущий пользователь
-        Optional<UserDto> author = userService.getCurrentUser();
-        if(author.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
-                    "Not authenticated"
-            );
-        }
+        UserDto author = userService.getCurrentUser().orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
+                "Not authenticated"
+        ));
 
         AdvertisementEntity advertisement = advertisementMapper.fromCreateRequest(request);
-        // Как обмениваться сущностями между сервисами?
-        advertisement.setAuthor(userRepository.findById(author.get().getId()).get());
+
+        advertisement.setAuthor(userRepository.findById(author.getId()).orElse(null));
 
         advertisementRepository.save(advertisement);
 
@@ -48,61 +45,39 @@ public class AdvertisementService {
 
     public AdvertisementDto edit(Long id, AdvertisementRequest request) {
         // проверка на авторизацию
-        Optional<UserDto> author = userService.getCurrentUser();
-        if(author.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
-                    "Not authenticated"
-            );
-        }
+        UserDto author = userService.getCurrentUser().orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
+                "Not authenticated"
+        ));
+
+        AdvertisementEntity advertisement = advertisementMapper.fromCreateRequest(request);
         
         // проверка на существование
-        Optional<AdvertisementEntity> advertisementOptional = advertisementRepository.findById(id);
-        if(advertisementOptional.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "No such advertisement"
-            );
-        }
-
-        AdvertisementEntity advertisement = advertisementOptional.get();
+        AdvertisementEntity currentAdvertisement = advertisementRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No such advertisement"
+        ));
         
         // проверка на авторство
-        if(!Objects.equals(author.get().getId(), advertisement.getAuthor().getId())) {
+        if(!Objects.equals(author.getId(), advertisement.getAuthor().getId())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Not the author"
             );
         }
 
-        // общие поля
-        advertisement.setTitle(request.getTitle());
-        advertisement.setDescription(request.getDescription());
-        advertisement.setPrice(request.getPrice());
-        advertisement.setImageUrl(request.getImageUrl());
-
-        // категория - приведение в сущность
-        Optional<CategoryEntity> categoryEntity = categoryService.getCategoryEntity(request.getCategory());
-        if(categoryEntity.isPresent()){
-            advertisement.setCategory(categoryEntity.get());
-        } else {throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "No such category"
-        );}
+        advertisement.setAuthor(currentAdvertisement.getAuthor());
 
         AdvertisementEntity saved = advertisementRepository.save(advertisement);
         return advertisementMapper.toDto(saved);
     }
 
     public AdvertisementDto getAdvertisement(Long id) {
-        Optional<AdvertisementEntity> advertisementOptional = advertisementRepository.findById(id);
-        if(advertisementOptional.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No such advertisement"
-            );
-        }
-        return advertisementMapper.toDto(advertisementOptional.get());
+        AdvertisementEntity advertisement = advertisementRepository.findById(id).orElseThrow(()->new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No such advertisement"
+        ));
+        return advertisementMapper.toDto(advertisement);
     }
 
     public void deleteById(Long id) {

@@ -25,7 +25,7 @@ public class ImageService {
     }
 
 
-    public ImageEntity save(MultipartFile file) throws Exception {
+    public ImageEntity create(MultipartFile file) throws Exception {
         String stringId;
         do {
             stringId = generateRandomHex(32);

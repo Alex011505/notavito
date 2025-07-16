@@ -24,16 +24,7 @@ public class CategoryService {
     private final AdvertisementMapper advertisementMapper;
 
     public CategoryDto create(CategoryRequest categoryRequest) {
-        CategoryEntity category = new CategoryEntity();
-
-        category.setName(categoryRequest.getName());
-
-        // проверка на отсутствие родителя
-        category.setParent(null);
-        Long parent = categoryRequest.getParent();
-        if (parent != null)
-            // присваиваем родителя, если нашли
-            category.setParent(categoryRepository.findById(parent).orElse(null));
+        CategoryEntity category = categoryMapper.fromRequest(categoryRequest);
 
         categoryRepository.save(category);
 
@@ -41,23 +32,12 @@ public class CategoryService {
     }
 
     public CategoryDto edit(Long id, CategoryRequest categoryRequest) {
-        Optional<CategoryEntity> categoryOptional = categoryRepository.findById(id);
-        if(categoryOptional.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "No such category"
-            );
-        }
-        CategoryEntity category = categoryOptional.get();
+        categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No such category"));
 
-        category.setName(categoryRequest.getName());
-
-        // проверка на отсутствие родителя
-        category.setParent(null);
-        Long parent = categoryRequest.getParent();
-        if (parent != 0)
-            // присваиваем родителя, если нашли
-            category.setParent(categoryRepository.findById(parent).orElse(null));
+        CategoryEntity category = categoryMapper.fromRequest(categoryRequest);
+        category.setId(id);
 
         categoryRepository.save(category);
 
@@ -66,14 +46,12 @@ public class CategoryService {
     }
 
     public CategoryDto getCategory(Long id) {
-        Optional<CategoryEntity> categoryOptional = categoryRepository.findById(id);
-        if(categoryOptional.isEmpty()) {
-            throw new ResponseStatusException(
+        CategoryEntity category = categoryRepository.findById(id).orElseThrow(()-> new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No such category"
-            );
-        }
-        return categoryMapper.toDto(categoryOptional.get());
+            ));
+
+        return categoryMapper.toDto(category);
     }
 
     public Optional<CategoryEntity> getCategoryEntity(Long id) {
@@ -92,10 +70,6 @@ public class CategoryService {
     public List<CategoryDto> findByParentId(Long parentId) {
         return categoryMapper.toDtoList(categoryRepository.findByParentId(parentId));
     }
-
-    //public List<AdvertisementDto> getChildren(Long id) {
-    //    return advertisementMapper.toDtoList(categoryRepository.getAdvertisements(id));
-    //}
 
 
 }
