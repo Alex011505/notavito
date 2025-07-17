@@ -3,6 +3,7 @@ package com.lithanarianaren.notavito.mapper;
 import com.lithanarianaren.notavito.dto.UserDto;
 import com.lithanarianaren.notavito.dto.request.RegisterRequest;
 import com.lithanarianaren.notavito.entity.UserEntity;
+import com.lithanarianaren.notavito.enum_.RoleEnum;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -18,4 +19,8 @@ public interface UserMapper {
 
     @Mapping(target = "password", qualifiedByName = {"User", "hashPassword"}, source = "password")
     UserEntity fromCreateRequest(RegisterRequest registerRequest);
+
+    default String map(RoleEnum role) {
+        return role.toString();
+    }
 }

@@ -32,6 +32,11 @@ public class UserService implements UserDetailsService {
 
 
 
+    private LoginResponse makeLoginResponse(UserEntity user) {
+        String token = jsonWebTokenService.newToken(user.getEmail(), user.getRole().toString());
+
+        return new LoginResponse(token, user.getEmail(), user.getRole().toString());
+    }
 
     public LoginResponse register(RegisterRequest request){
 
@@ -40,9 +45,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = userMapper.fromCreateRequest(request);
         userRepository.save(user);
 
-        String token = jsonWebTokenService.newToken(user.getEmail(), user.getRole());
-
-        return new LoginResponse(token, user.getEmail(), user.getRole());
+        return makeLoginResponse(user);
 
     }
 
@@ -111,9 +114,7 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect password");
         }
 
-        String token = jsonWebTokenService.newToken(user.getEmail(), user.getRole());
-
-        return new LoginResponse(token, user.getEmail(), user.getRole());
+        return makeLoginResponse(user);
 
     }
 

@@ -14,5 +14,5 @@ public class UserDto {
     private String patronymic;
     private String email;
     private String phone;
-
+    private String role;
 }

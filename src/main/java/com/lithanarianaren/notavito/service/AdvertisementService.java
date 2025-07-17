@@ -8,6 +8,7 @@ import com.lithanarianaren.notavito.entity.CategoryEntity;
 import com.lithanarianaren.notavito.mapper.AdvertisementMapper;
 import com.lithanarianaren.notavito.repository.AdvertisementRepository;
 import com.lithanarianaren.notavito.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,15 @@ public class AdvertisementService {
                 "Not authenticated"
         ));
 
-        AdvertisementEntity advertisement = advertisementMapper.fromCreateRequest(request);
+        AdvertisementEntity advertisement;
+        try {
+            advertisement = advertisementMapper.fromCreateRequest(request);
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No such category"
+            );
+        }
 
         advertisement.setAuthor(userRepository.findById(author.getId()).orElse(null));
 
@@ -64,7 +73,14 @@ public class AdvertisementService {
             );
         }
 
-        advertisementMapper.updateFromRequest(request, currentAdvertisement);
+        try {
+            advertisementMapper.updateFromRequest(request, currentAdvertisement);
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No such category"
+            );
+        }
 
         AdvertisementEntity saved = advertisementRepository.save(currentAdvertisement);
         return advertisementMapper.toDto(saved);

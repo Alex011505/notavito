@@ -1,6 +1,7 @@
 package com.lithanarianaren.notavito.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.lithanarianaren.notavito.enum_.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +30,8 @@ public class UserEntity extends BaseEntity {
     @Column(unique = true)
     private String phone;
 
-    @Column(nullable = false)
-    private String role = "USER";
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role = RoleEnum.USER;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     @JsonManagedReference

@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdvertisementController {
 
-    private AdvertisementService advertisementService;
+    private final AdvertisementService advertisementService;
 
     @RequestMapping("/")
     public String index() {

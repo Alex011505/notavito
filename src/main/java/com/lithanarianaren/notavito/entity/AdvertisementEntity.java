@@ -1,5 +1,6 @@
 package com.lithanarianaren.notavito.entity;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,5 +29,7 @@ public class AdvertisementEntity extends BaseEntity {
     private BigDecimal price;
 
     private String imageUrl;
+
+    private boolean isOpen;
 }
 

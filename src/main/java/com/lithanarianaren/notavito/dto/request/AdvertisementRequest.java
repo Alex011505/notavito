@@ -16,4 +16,6 @@ public class AdvertisementRequest {
     @Min(value = 0, message = "Cannot be negative")
     private BigDecimal price;
     private String imageUrl;
+
+    private boolean isOpen;
 }
