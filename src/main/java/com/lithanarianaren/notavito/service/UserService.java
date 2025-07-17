@@ -8,6 +8,7 @@ import com.lithanarianaren.notavito.mapper.UserMapper;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -55,12 +56,12 @@ public class UserService implements UserDetailsService {
 
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            err.add("Email in use");
+            err.add("Email in use: %s".formatted(request.getEmail()));
         }
 
         if (userRepository.findByPhone(request.getPhone()).isPresent()){
 
-            err.add("Phone in use");
+            err.add("Phone in use: %s".formatted(request.getPhone()));
 
         }
 
@@ -91,6 +92,9 @@ public class UserService implements UserDetailsService {
 
     public Optional<UserDto> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication instanceof AnonymousAuthenticationToken) {
+            return Optional.empty();
+        }
         if (authentication != null && authentication.isAuthenticated()) {
             String login = authentication.getName();
             System.out.println(login);

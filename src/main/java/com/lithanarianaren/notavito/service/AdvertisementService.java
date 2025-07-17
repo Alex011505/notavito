@@ -31,7 +31,7 @@ public class AdvertisementService {
     public AdvertisementDto create(AdvertisementRequest request) {
         // Автор - текущий пользователь
         UserDto author = userService.getCurrentUser().orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
+                HttpStatus.UNAUTHORIZED,
                 "Not authenticated"
         ));
 
@@ -53,25 +53,7 @@ public class AdvertisementService {
     }
 
     public AdvertisementDto edit(Long id, AdvertisementRequest request) {
-        // проверка на авторизацию
-        UserDto author = userService.getCurrentUser().orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
-                "Not authenticated"
-        ));
-        
-        // проверка на существование
-        AdvertisementEntity currentAdvertisement = advertisementRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "No such advertisement"
-        ));
-        
-        // проверка на авторство
-        if(!Objects.equals(author.getId(), currentAdvertisement.getAuthor().getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Not the author"
-            );
-        }
+        AdvertisementEntity currentAdvertisement = ensureCanEdit(id);
 
         try {
             advertisementMapper.updateFromRequest(request, currentAdvertisement);
@@ -82,8 +64,8 @@ public class AdvertisementService {
             );
         }
 
-        AdvertisementEntity saved = advertisementRepository.save(currentAdvertisement);
-        return advertisementMapper.toDto(saved);
+        advertisementRepository.save(currentAdvertisement);
+        return advertisementMapper.toDto(currentAdvertisement);
     }
 
     public AdvertisementDto getAdvertisement(Long id) {
@@ -95,6 +77,7 @@ public class AdvertisementService {
     }
 
     public void deleteById(Long id) {
+        ensureCanEdit(id);
         advertisementRepository.deleteById(id);
     }
 
@@ -104,6 +87,30 @@ public class AdvertisementService {
 
     public List<AdvertisementDto> findAll() {
         return advertisementMapper.toDtoList(advertisementRepository.findAll());
+    }
+
+    private AdvertisementEntity ensureCanEdit(Long id) {
+        // проверка на авторизацию
+        UserDto author = userService.getCurrentUser().orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Not authenticated"
+        ));
+
+        // проверка на существование
+        AdvertisementEntity currentAdvertisement = advertisementRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No such advertisement"
+        ));
+
+        // проверка на авторство
+        if(!Objects.equals(author.getId(), currentAdvertisement.getAuthor().getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Not the author"
+            );
+        }
+
+        return currentAdvertisement;
     }
 }
 
