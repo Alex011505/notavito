@@ -49,8 +49,6 @@ public class AdvertisementService {
                 HttpStatus.NETWORK_AUTHENTICATION_REQUIRED,
                 "Not authenticated"
         ));
-
-        AdvertisementEntity advertisement = advertisementMapper.fromCreateRequest(request);
         
         // проверка на существование
         AdvertisementEntity currentAdvertisement = advertisementRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
@@ -59,16 +57,16 @@ public class AdvertisementService {
         ));
         
         // проверка на авторство
-        if(!Objects.equals(author.getId(), advertisement.getAuthor().getId())) {
+        if(!Objects.equals(author.getId(), currentAdvertisement.getAuthor().getId())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Not the author"
             );
         }
 
-        advertisement.setAuthor(currentAdvertisement.getAuthor());
+        advertisementMapper.updateFromRequest(request, currentAdvertisement);
 
-        AdvertisementEntity saved = advertisementRepository.save(advertisement);
+        AdvertisementEntity saved = advertisementRepository.save(currentAdvertisement);
         return advertisementMapper.toDto(saved);
     }
 

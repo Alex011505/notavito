@@ -3,8 +3,7 @@ package com.lithanarianaren.notavito.mapper;
 import com.lithanarianaren.notavito.dto.AdvertisementDto;
 import com.lithanarianaren.notavito.dto.request.AdvertisementRequest;
 import com.lithanarianaren.notavito.entity.AdvertisementEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -17,4 +16,6 @@ public interface AdvertisementMapper{
 
     AdvertisementEntity fromCreateRequest(AdvertisementRequest request);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateFromRequest(AdvertisementRequest request, @MappingTarget AdvertisementEntity entity);
 }

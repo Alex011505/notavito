@@ -32,12 +32,11 @@ public class CategoryService {
     }
 
     public CategoryDto edit(Long id, CategoryRequest categoryRequest) {
-        categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "No such category"));
 
-        CategoryEntity category = categoryMapper.fromRequest(categoryRequest);
-        category.setId(id);
+        categoryMapper.updateFromRequest(categoryRequest, category);
 
         categoryRepository.save(category);
 

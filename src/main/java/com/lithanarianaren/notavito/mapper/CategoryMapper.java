@@ -5,6 +5,7 @@ import com.lithanarianaren.notavito.dto.request.CategoryRequest;
 import com.lithanarianaren.notavito.entity.CategoryEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface CategoryMapper {
     CategoryEntity toEntity(Long id);
 
     CategoryEntity fromRequest(CategoryRequest request);
+
+    void updateFromRequest(CategoryRequest request, @MappingTarget CategoryEntity entity);
 }
