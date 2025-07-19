@@ -96,16 +96,17 @@ public class AdvertisementService {
                 "Not authenticated"
         ));
 
-        // проверка на существование
+
         AdvertisementEntity currentAdvertisement = advertisementRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "No such advertisement"
         ));
 
         // проверка на авторство
-        if(!Objects.equals(author.getId(), currentAdvertisement.getAuthor().getId())) {
+        if(!Objects.equals(author.getRole(), "ADMIN") &&
+                !Objects.equals(author.getId(), currentAdvertisement.getAuthor().getId())) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
+                    HttpStatus.FORBIDDEN,
                     "Not the author"
             );
         }

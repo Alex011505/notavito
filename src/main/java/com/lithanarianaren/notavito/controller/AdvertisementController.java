@@ -16,18 +16,13 @@ import java.util.List;
 public class AdvertisementController {
 
     private final AdvertisementService advertisementService;
-
-    @RequestMapping("/")
-    public String index() {
-        return "";
-    }
     
     @PostMapping
     public ResponseEntity<AdvertisementDto> createAdvertisement(@RequestBody AdvertisementRequest advertisementRequest) {
         AdvertisementDto created = advertisementService.create(advertisementRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<AdvertisementDto>> getAllAdvertisements() {
         return ResponseEntity.ok(advertisementService.findAll());
     }

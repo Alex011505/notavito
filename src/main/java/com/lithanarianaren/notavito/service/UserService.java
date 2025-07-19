@@ -105,6 +105,19 @@ public class UserService implements UserDetailsService {
 
     public void delete(Long id){
 
+        UserDto user = getCurrentUser().orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Not authenticated"
+        ));
+
+        if(!Objects.equals(user.getRole(), "ADMIN") &&
+                !Objects.equals(user.getId(), id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Not account holder"
+            );
+        }
+
         userRepository.deleteById(id);
 
     }
