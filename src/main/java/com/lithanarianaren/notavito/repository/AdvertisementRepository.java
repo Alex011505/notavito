@@ -9,4 +9,5 @@ public interface AdvertisementRepository extends JpaRepository<AdvertisementEnti
 
     List<AdvertisementEntity> findByTitleContainingIgnoreCase(String title);
 
+    List<AdvertisementEntity> findByCategoryId(Long categoryId);
 }

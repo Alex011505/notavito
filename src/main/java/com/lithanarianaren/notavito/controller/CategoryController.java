@@ -1,5 +1,6 @@
 package com.lithanarianaren.notavito.controller;
 
+import com.lithanarianaren.notavito.dto.AdvertisementDto;
 import com.lithanarianaren.notavito.dto.CategoryDto;
 import com.lithanarianaren.notavito.dto.request.CategoryRequest;
 import com.lithanarianaren.notavito.service.CategoryService;
@@ -53,11 +54,6 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> findChildrenById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.findByParentId(id));
     }
-
-    //@GetMapping("/{id}/ads")
-    //public ResponseEntity<List<AdvertisementDto>> findAdsById(@RequestParam Long id) {
-    //
-    //}
 
 
     @DeleteMapping("/{id}")

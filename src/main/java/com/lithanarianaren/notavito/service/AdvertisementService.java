@@ -85,6 +85,10 @@ public class AdvertisementService {
         return advertisementMapper.toDtoList(advertisementRepository.findByTitleContainingIgnoreCase(name));
     }
 
+    public List<AdvertisementDto> findByCategoryId(Long categoryId) {
+        return advertisementMapper.toDtoList(advertisementRepository.findByCategoryId(categoryId));
+    }
+
     public List<AdvertisementDto> findAll() {
         return advertisementMapper.toDtoList(advertisementRepository.findAll());
     }

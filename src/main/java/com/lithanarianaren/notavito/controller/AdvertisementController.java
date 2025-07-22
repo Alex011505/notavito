@@ -23,8 +23,11 @@ public class AdvertisementController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
     @GetMapping
-    public ResponseEntity<List<AdvertisementDto>> getAllAdvertisements() {
-        return ResponseEntity.ok(advertisementService.findAll());
+    public ResponseEntity<List<AdvertisementDto>> getAllAdvertisements(@RequestParam Long categoryId) {
+        if(categoryId==null)
+            return ResponseEntity.ok(advertisementService.findAll());
+
+        return ResponseEntity.ok(advertisementService.findByCategoryId(categoryId));
     }
 
     @PutMapping("/{id}")
