@@ -55,6 +55,9 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/categories", "/categories/**")
                         .hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.DELETE, "/images/**")
+                        .hasRole("ADMIN")
+
                         .anyRequest().hasAnyRole("USER","ADMIN")
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
