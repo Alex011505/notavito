@@ -1,12 +1,15 @@
 package com.lithanarianaren.notavito.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.AttributeAccessor;
 
 import java.math.BigDecimal;
 
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AdvertisementDto {
     private Long id;
     private Long category;

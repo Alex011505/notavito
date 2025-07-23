@@ -3,8 +3,7 @@ package com.lithanarianaren.notavito.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.lithanarianaren.notavito.enum_.RoleEnum;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +11,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserEntity extends BaseEntity {
 
     @Column(nullable = false)

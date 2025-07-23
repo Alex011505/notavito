@@ -2,8 +2,7 @@ package com.lithanarianaren.notavito.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,6 +10,9 @@ import java.math.BigDecimal;
 @Table(name = "advertisements")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class AdvertisementEntity extends BaseEntity {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
